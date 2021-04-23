@@ -4,7 +4,7 @@
 
 package server
 
-import "github.com/skynetservices/skydns/msg"
+import "github.com/tyler-cromwell/skydns/msg"
 
 type Backend interface {
 	HasSynced() bool

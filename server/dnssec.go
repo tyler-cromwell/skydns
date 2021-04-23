@@ -11,9 +11,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/skynetservices/skydns/cache"
-	"github.com/skynetservices/skydns/metrics"
-	"github.com/skynetservices/skydns/singleflight"
+	"github.com/tyler-cromwell/skydns/cache"
+	"github.com/tyler-cromwell/skydns/metrics"
+	"github.com/tyler-cromwell/skydns/singleflight"
 
 	"github.com/miekg/dns"
 )

@@ -18,11 +18,11 @@ import (
 	"strings"
 	"time"
 
-	backendetcd "github.com/skynetservices/skydns/backends/etcd"
-	backendetcdv3 "github.com/skynetservices/skydns/backends/etcd3"
-	"github.com/skynetservices/skydns/metrics"
-	"github.com/skynetservices/skydns/msg"
-	"github.com/skynetservices/skydns/server"
+	backendetcd "github.com/tyler-cromwell/skydns/backends/etcd"
+	backendetcdv3 "github.com/tyler-cromwell/skydns/backends/etcd3"
+	"github.com/tyler-cromwell/skydns/metrics"
+	"github.com/tyler-cromwell/skydns/msg"
+	"github.com/tyler-cromwell/skydns/server"
 
 	etcd "github.com/coreos/etcd/client"
 	etcdv3 "github.com/coreos/etcd/clientv3"

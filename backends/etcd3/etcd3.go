@@ -15,8 +15,8 @@ import (
 
 	etcdv3 "github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/skynetservices/skydns/msg"
-	"github.com/skynetservices/skydns/singleflight"
+	"github.com/tyler-cromwell/skydns/msg"
+	"github.com/tyler-cromwell/skydns/singleflight"
 )
 
 type Config struct {

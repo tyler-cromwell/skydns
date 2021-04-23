@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/miekg/dns"
-	"github.com/skynetservices/skydns/msg"
+	"github.com/tyler-cromwell/skydns/msg"
 )
 
 const ednsStubCode = dns.EDNS0LOCALSTART + 10

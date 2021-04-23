@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/skynetservices/skydns/msg"
-	"github.com/skynetservices/skydns/singleflight"
+	"github.com/tyler-cromwell/skydns/msg"
+	"github.com/tyler-cromwell/skydns/singleflight"
 
 	etcd "github.com/coreos/etcd/client"
 )
