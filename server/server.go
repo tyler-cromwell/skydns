@@ -345,13 +345,15 @@ func (s *server) ServeDNS(w dns.ResponseWriter, req *dns.Msg) {
 		return
 	}
 
+	requesterIP := w.RemoteAddr()
+
 	switch q.Qtype {
 	case dns.TypeNS:
 		if name != s.config.Domain {
 			break
 		}
 		// Lookup s.config.DnsDomain
-		records, extra, err := s.NSRecords(q, s.config.dnsDomain)
+		records, extra, err := s.NSRecords(q, s.config.dnsDomain, requesterIP)
 		if isEtcdNameError(err, s) {
 			m = s.NameError(req)
 			return
@@ -359,28 +361,28 @@ func (s *server) ServeDNS(w dns.ResponseWriter, req *dns.Msg) {
 		m.Answer = append(m.Answer, records...)
 		m.Extra = append(m.Extra, extra...)
 	case dns.TypeA, dns.TypeAAAA:
-		records, err := s.AddressRecords(q, name, nil, bufsize, dnssec, false)
+		records, err := s.AddressRecords(q, name, requesterIP, nil, bufsize, dnssec, false)
 		if isEtcdNameError(err, s) {
 			m = s.NameError(req)
 			return
 		}
 		m.Answer = append(m.Answer, records...)
 	case dns.TypeTXT:
-		records, err := s.TXTRecords(q, name)
+		records, err := s.TXTRecords(q, name, requesterIP)
 		if isEtcdNameError(err, s) {
 			m = s.NameError(req)
 			return
 		}
 		m.Answer = append(m.Answer, records...)
 	case dns.TypeCNAME:
-		records, err := s.CNAMERecords(q, name)
+		records, err := s.CNAMERecords(q, name, requesterIP)
 		if isEtcdNameError(err, s) {
 			m = s.NameError(req)
 			return
 		}
 		m.Answer = append(m.Answer, records...)
 	case dns.TypeMX:
-		records, extra, err := s.MXRecords(q, name, bufsize, dnssec)
+		records, extra, err := s.MXRecords(q, name, requesterIP, bufsize, dnssec)
 		if isEtcdNameError(err, s) {
 			m = s.NameError(req)
 			return
@@ -390,7 +392,7 @@ func (s *server) ServeDNS(w dns.ResponseWriter, req *dns.Msg) {
 	default:
 		fallthrough // also catch other types, so that they return NODATA
 	case dns.TypeSRV:
-		records, extra, err := s.SRVRecords(q, name, bufsize, dnssec)
+		records, extra, err := s.SRVRecords(q, name, requesterIP, bufsize, dnssec)
 		if err != nil {
 			if isEtcdNameError(err, s) {
 				m = s.NameError(req)
@@ -418,8 +420,8 @@ func (s *server) ServeDNS(w dns.ResponseWriter, req *dns.Msg) {
 	}
 }
 
-func (s *server) AddressRecords(q dns.Question, name string, previousRecords []dns.RR, bufsize uint16, dnssec, both bool) (records []dns.RR, err error) {
-	services, err := s.backend.Records(name, false)
+func (s *server) AddressRecords(q dns.Question, name string, requesterIP string, previousRecords []dns.RR, bufsize uint16, dnssec, both bool) (records []dns.RR, err error) {
+	services, err := s.backend.Records(name, requesterIP, false)
 	if err != nil {
 		return nil, err
 	}
@@ -484,8 +486,8 @@ func (s *server) AddressRecords(q dns.Question, name string, previousRecords []d
 }
 
 // NSRecords returns NS records from etcd.
-func (s *server) NSRecords(q dns.Question, name string) (records []dns.RR, extra []dns.RR, err error) {
-	services, err := s.backend.Records(name, false)
+func (s *server) NSRecords(q dns.Question, name string, requesterIP string) (records []dns.RR, extra []dns.RR, err error) {
+	services, err := s.backend.Records(name, requesterIP, false)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -512,8 +514,8 @@ func (s *server) NSRecords(q dns.Question, name string) (records []dns.RR, extra
 
 // SRVRecords returns SRV records from etcd.
 // If the Target is not a name but an IP address, a name is created.
-func (s *server) SRVRecords(q dns.Question, name string, bufsize uint16, dnssec bool) (records []dns.RR, extra []dns.RR, err error) {
-	services, err := s.backend.Records(name, false)
+func (s *server) SRVRecords(q dns.Question, name string, requesterIP string, bufsize uint16, dnssec bool) (records []dns.RR, extra []dns.RR, err error) {
+	services, err := s.backend.Records(name, requesterIP, false)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -597,8 +599,8 @@ func (s *server) SRVRecords(q dns.Question, name string, bufsize uint16, dnssec 
 
 // MXRecords returns MX records from etcd.
 // If the Target is not a name but an IP address, a name is created.
-func (s *server) MXRecords(q dns.Question, name string, bufsize uint16, dnssec bool) (records []dns.RR, extra []dns.RR, err error) {
-	services, err := s.backend.Records(name, false)
+func (s *server) MXRecords(q dns.Question, name string, requesterIP string, bufsize uint16, dnssec bool) (records []dns.RR, extra []dns.RR, err error) {
+	services, err := s.backend.Records(name, requesterIP, false)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -654,8 +656,8 @@ func (s *server) MXRecords(q dns.Question, name string, bufsize uint16, dnssec b
 	return records, extra, nil
 }
 
-func (s *server) CNAMERecords(q dns.Question, name string) (records []dns.RR, err error) {
-	services, err := s.backend.Records(name, true)
+func (s *server) CNAMERecords(q dns.Question, name string, requesterIP string) (records []dns.RR, err error) {
+	services, err := s.backend.Records(name, requesterIP, true)
 	if err != nil {
 		return nil, err
 	}
@@ -671,8 +673,8 @@ func (s *server) CNAMERecords(q dns.Question, name string) (records []dns.RR, er
 	return records, nil
 }
 
-func (s *server) TXTRecords(q dns.Question, name string) (records []dns.RR, err error) {
-	services, err := s.backend.Records(name, false)
+func (s *server) TXTRecords(q dns.Question, name string, requesterIP string) (records []dns.RR, err error) {
+	services, err := s.backend.Records(name, requesterIP, false)
 	if err != nil {
 		return nil, err
 	}
