@@ -345,7 +345,7 @@ func (s *server) ServeDNS(w dns.ResponseWriter, req *dns.Msg) {
 		return
 	}
 
-	requesterIP := w.RemoteAddr()
+	requesterIP := w.RemoteAddr().String()
 
 	switch q.Qtype {
 	case dns.TypeNS:
@@ -451,7 +451,7 @@ func (s *server) AddressRecords(q dns.Question, name string, requesterIP string,
 			}
 
 			nextRecords, err := s.AddressRecords(dns.Question{Name: dns.Fqdn(serv.Host), Qtype: q.Qtype, Qclass: q.Qclass},
-				strings.ToLower(dns.Fqdn(serv.Host)), append(previousRecords, newRecord), bufsize, dnssec, both)
+				strings.ToLower(dns.Fqdn(serv.Host)), requesterIP, append(previousRecords, newRecord), bufsize, dnssec, both)
 			if err == nil {
 				// Only have we found something we should add the CNAME and the IP addresses.
 				if len(nextRecords) > 0 {
@@ -576,7 +576,7 @@ func (s *server) SRVRecords(q dns.Question, name string, requesterIP string, buf
 			// Clients expect a complete answer, because we are a recursor in their
 			// view.
 			addr, e1 := s.AddressRecords(dns.Question{srv.Target, dns.ClassINET, dns.TypeA},
-				srv.Target, nil, bufsize, dnssec, true)
+				srv.Target, requesterIP, nil, bufsize, dnssec, true)
 			if e1 == nil {
 				extra = append(extra, addr...)
 			}
@@ -639,7 +639,7 @@ func (s *server) MXRecords(q dns.Question, name string, requesterIP string, bufs
 			}
 			// Internal name
 			addr, e1 := s.AddressRecords(dns.Question{mx.Mx, dns.ClassINET, dns.TypeA},
-				mx.Mx, nil, bufsize, dnssec, true)
+				mx.Mx, requesterIP, nil, bufsize, dnssec, true)
 			if e1 == nil {
 				extra = append(extra, addr...)
 			}
