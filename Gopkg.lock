@@ -122,22 +122,6 @@
   version = "v0.0.5"
 
 [[projects]]
-  branch = "master"
-  digest = "1:8ceeb397506d4f497f349efc4613abc86a5aba9e8291b229e3592cb655118e19"
-  name = "github.com/skynetservices/skydns"
-  packages = [
-    "backends/etcd",
-    "backends/etcd3",
-    "cache",
-    "metrics",
-    "msg",
-    "server",
-    "singleflight",
-  ]
-  pruneopts = "UT"
-  revision = "fc00e571c471eef3d6d15f500b6c3a6f55d2ee90"
-
-[[projects]]
   digest = "1:65946d7902d5aa57acdf6c3771c1de1ecd23f0dc32536849cfa28bd95a4400a5"
   name = "github.com/ugorji/go"
   packages = ["codec"]
@@ -262,13 +246,6 @@
     "github.com/miekg/dns",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promhttp",
-    "github.com/skynetservices/skydns/backends/etcd",
-    "github.com/skynetservices/skydns/backends/etcd3",
-    "github.com/skynetservices/skydns/cache",
-    "github.com/skynetservices/skydns/metrics",
-    "github.com/skynetservices/skydns/msg",
-    "github.com/skynetservices/skydns/server",
-    "github.com/skynetservices/skydns/singleflight",
     "golang.org/x/net/context",
   ]
   solver-name = "gps-cdcl"

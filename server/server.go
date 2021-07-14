@@ -63,11 +63,11 @@ func (s *server) Run() error {
 	}
 
 	if s.config.Systemd {
-		packetConns, err := activation.PacketConns()
+		packetConns, err := activation.PacketConns(false)
 		if err != nil {
 			return err
 		}
-		listeners, err := activation.Listeners()
+		listeners, err := activation.Listeners(false)
 		if err != nil {
 			return err
 		}

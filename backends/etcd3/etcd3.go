@@ -11,6 +11,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/miekg/dns"
 	"strings"
 
 	etcdv3 "github.com/coreos/etcd/clientv3"
@@ -45,7 +46,7 @@ func (g *Backendv3) HasSynced() bool {
 	return true
 }
 
-func (g *Backendv3) Records(name string, exact bool) ([]msg.Service, error) {
+func (g *Backendv3) Records(name string, requesterID string, exact bool) ([]msg.Service, error) {
 	path, star := msg.PathWithWildcard(name)
 	r, err := g.get(path, true)
 	if err != nil {
@@ -76,6 +77,14 @@ func (g *Backendv3) ReverseRecord(name string) (*msg.Service, error) {
 		return nil, fmt.Errorf("must be only one service record")
 	}
 	return &records[0], nil
+}
+
+func (g *Backendv3) TranslateForwardedRequest(name string, requesterIP string, req *dns.Msg)(*dns.Msg, error) {
+	return req, nil
+}
+
+func (g *Backendv3) TranslateForwardedResponse(name string, responderIP string, resp *dns.Msg)(*dns.Msg, error) {
+	return resp, nil
 }
 
 func (g *Backendv3) get(path string, recursive bool) (*etcdv3.GetResponse, error) {

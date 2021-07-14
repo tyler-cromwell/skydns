@@ -6,6 +6,7 @@ package server
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/miekg/dns"
 )
@@ -32,23 +33,34 @@ func (s *server) ServeDNSForward(w dns.ResponseWriter, req *dns.Msg) *dns.Msg {
 		return m
 	}
 
-	var (
-		r   *dns.Msg
-		err error
-	)
+	var r *dns.Msg
+	q := req.Question[0]
+	name := strings.ToLower(q.Name)
+	requesterIP := w.RemoteAddr().String()
 
-	nsid := s.randomNameserverID(req.Id)
+	translatedReq, err := s.backend.TranslateForwardedRequest(name, requesterIP, req)
+	if err != nil {
+		logf("can not translate forwarded request: (%s)", err.Error())
+		m := s.ServerFailure(translatedReq)
+		w.WriteMsg(m)
+		return m
+	}
+
+	nsid := s.randomNameserverID(translatedReq.Id)
 	try := 0
 Redo:
 	if isTCP(w) {
-		r, err = exchangeWithRetry(s.dnsTCPclient, req, s.config.Nameservers[nsid])
+		r, err = exchangeWithRetry(s.dnsTCPclient, translatedReq, s.config.Nameservers[nsid])
 	} else {
-		r, err = exchangeWithRetry(s.dnsUDPclient, req, s.config.Nameservers[nsid])
+		r, err = exchangeWithRetry(s.dnsUDPclient, translatedReq, s.config.Nameservers[nsid])
 	}
 	if err == nil {
 		r.Compress = true
-		r.Id = req.Id
-		w.WriteMsg(r)
+		r.Id = translatedReq.Id
+		r, err = s.backend.TranslateForwardedResponse(name, requesterIP, r)
+		if err != nil {
+			logf("can not translate forwarded response: (%s)", err.Error())
+		}
 		return r
 	}
 	// Seen an error, this can only mean, "server not reached", try again
@@ -60,7 +72,7 @@ Redo:
 	}
 
 	logf("failure to forward request %q", err)
-	m := s.ServerFailure(req)
+	m := s.ServerFailure(translatedReq)
 	return m
 }
 

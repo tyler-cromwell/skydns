@@ -10,6 +10,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/miekg/dns"
 	"strings"
 
 	"github.com/tyler-cromwell/skydns/msg"
@@ -46,7 +47,7 @@ func (g *Backend) HasSynced() bool {
 	return true
 }
 
-func (g *Backend) Records(name string, exact bool) ([]msg.Service, error) {
+func (g *Backend) Records(name string, requesterID string, exact bool) ([]msg.Service, error) {
 	path, star := msg.PathWithWildcard(name)
 	r, err := g.get(path, true)
 	if err != nil {
@@ -84,6 +85,14 @@ func (g *Backend) ReverseRecord(name string) (*msg.Service, error) {
 		return nil, fmt.Errorf("must be only one service record")
 	}
 	return &records[0], nil
+}
+
+func (g *Backend) TranslateForwardedRequest(name string, requesterIP string, req *dns.Msg)(*dns.Msg, error) {
+	return req, nil
+}
+
+func (g *Backend) TranslateForwardedResponse(name string, responderIP string, resp *dns.Msg)(*dns.Msg, error) {
+	return resp, nil
 }
 
 // get is a wrapper for client.Get that uses SingleInflight to suppress multiple
