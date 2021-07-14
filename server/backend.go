@@ -4,12 +4,17 @@
 
 package server
 
-import "github.com/tyler-cromwell/skydns/msg"
+import (
+	"github.com/miekg/dns"
+	"github.com/tyler-cromwell/skydns/msg"
+)
 
 type Backend interface {
 	HasSynced() bool
 	Records(name string, requesterIP string, exact bool) ([]msg.Service, error)
 	ReverseRecord(name string) (*msg.Service, error)
+	TranslateForwardedRequest(name string, requesterIP string, req *dns.Msg)(*dns.Msg, error)
+	TranslateForwardedResponse(name string, responderIP string, resp *dns.Msg)(*dns.Msg, error)
 }
 
 // FirstBackend exposes the Backend interface over multiple Backends, returning
@@ -49,4 +54,12 @@ func (g FirstBackend) ReverseRecord(name string) (record *msg.Service, err error
 func (g FirstBackend) HasSynced() bool {
 	// Stub implementation only to satisfy interface.
 	return true
+}
+
+func (g FirstBackend) TranslateForwardedRequest(name string, requesterIP string, req *dns.Msg)(*dns.Msg, error) {
+	return req, nil
+}
+
+func (g FirstBackend) TranslateForwardedResponse(name string, responderIP string, resp *dns.Msg)(*dns.Msg, error) {
+	return resp, nil
 }
