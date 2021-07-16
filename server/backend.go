@@ -14,7 +14,7 @@ type Backend interface {
 	Records(name string, requesterIP string, exact bool) ([]msg.Service, error)
 	ReverseRecord(name string) (*msg.Service, error)
 	TranslateForwardedRequest(name string, requesterIP string, req *dns.Msg)(*dns.Msg, error)
-	TranslateForwardedResponse(name string, responderIP string, resp *dns.Msg)(*dns.Msg, error)
+	TranslateForwardedResponse(name string, responderIP string, req, resp *dns.Msg)(*dns.Msg, error)
 }
 
 // FirstBackend exposes the Backend interface over multiple Backends, returning
@@ -60,6 +60,6 @@ func (g FirstBackend) TranslateForwardedRequest(name string, requesterIP string,
 	return req, nil
 }
 
-func (g FirstBackend) TranslateForwardedResponse(name string, responderIP string, resp *dns.Msg)(*dns.Msg, error) {
+func (g FirstBackend) TranslateForwardedResponse(name string, responderIP string, req, resp *dns.Msg)(*dns.Msg, error) {
 	return resp, nil
 }
