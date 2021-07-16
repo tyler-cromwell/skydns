@@ -83,7 +83,7 @@ func (g *Backendv3) TranslateForwardedRequest(name string, requesterIP string, r
 	return req, nil
 }
 
-func (g *Backendv3) TranslateForwardedResponse(name string, responderIP string, resp *dns.Msg)(*dns.Msg, error) {
+func (g *Backendv3) TranslateForwardedResponse(name string, responderIP string, req, resp *dns.Msg)(*dns.Msg, error) {
 	return resp, nil
 }
 

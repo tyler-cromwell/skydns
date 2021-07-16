@@ -41,7 +41,7 @@ func (s *server) ServeDNSForward(w dns.ResponseWriter, req *dns.Msg) *dns.Msg {
 	translatedReq, err := s.backend.TranslateForwardedRequest(name, requesterIP, req)
 	if err != nil {
 		logf("can not translate forwarded request: (%s)", err.Error())
-		m := s.ServerFailure(translatedReq)
+		m := s.ServerFailure(req)
 		w.WriteMsg(m)
 		return m
 	}
@@ -57,7 +57,7 @@ Redo:
 	if err == nil {
 		r.Compress = true
 		r.Id = translatedReq.Id
-		r, err = s.backend.TranslateForwardedResponse(name, requesterIP, r)
+		r, err = s.backend.TranslateForwardedResponse(name, requesterIP, req, r)
 		if err != nil {
 			logf("can not translate forwarded response: (%s)", err.Error())
 		}

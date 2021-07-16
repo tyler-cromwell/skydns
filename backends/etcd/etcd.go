@@ -91,7 +91,7 @@ func (g *Backend) TranslateForwardedRequest(name string, requesterIP string, req
 	return req, nil
 }
 
-func (g *Backend) TranslateForwardedResponse(name string, responderIP string, resp *dns.Msg)(*dns.Msg, error) {
+func (g *Backend) TranslateForwardedResponse(name string, responderIP string, req, resp *dns.Msg)(*dns.Msg, error) {
 	return resp, nil
 }
 
