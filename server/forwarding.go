@@ -45,6 +45,11 @@ func (s *server) ServeDNSForward(w dns.ResponseWriter, req *dns.Msg) *dns.Msg {
 		w.WriteMsg(m)
 		return m
 	}
+	if translatedReq == nil {
+		m := s.NameError(req)
+		w.WriteMsg(m)
+		return m
+	}
 
 	nsid := s.randomNameserverID(translatedReq.Id)
 	try := 0
@@ -61,6 +66,7 @@ Redo:
 		if err != nil {
 			logf("can not translate forwarded response: (%s)", err.Error())
 		}
+		w.WriteMsg(r)
 		return r
 	}
 	// Seen an error, this can only mean, "server not reached", try again
